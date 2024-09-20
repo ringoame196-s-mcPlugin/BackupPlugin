@@ -35,6 +35,7 @@ class BackupManager(private val plugin: Plugin) {
 
         try {
             makeTimeFolder(timeFolderName)
+            makeServerInfo(timeFolderName)
             for (folderName in folderNames) {
                 copyFolder(timeFolderName, folderName.toString())
             }
@@ -72,47 +73,40 @@ class BackupManager(private val plugin: Plugin) {
         }
     }
 
-    private fun copyFolder(timeFolderName: String, folderName: String) {
-        val copySourcePath = "$worldFolder/$folderName"
-        val backupFolderPath = Paths.get("$backupFolderPath/$timeFolderName/$folderName")
+    private fun makeServerInfo(timeFolderName: String) {
+        val size = Bukkit.getOnlinePlayers().size
+        val lastChat = acquisitionLatestChat()
+        val path = "$backupFolderPath/$timeFolderName/serverInfo.txt"
+        val serverInfoFile = File(path)
 
-        copyDir(Paths.get(copySourcePath), backupFolderPath)
+        var serverInfoText = "サーバー人数:${size}人 \n直近チャット:\n"
+        for (chat in lastChat) { // 直近チャットを記載
+            serverInfoText += "$chat\n"
+        }
+        serverInfoFile.writeText(serverInfoText)
     }
 
-    private fun copyDir(source: Path, destination: Path) {
-        // コピー先のフォルダが存在しない場合は作成
-        if (Files.notExists(destination)) {
-            Files.createDirectories(destination)
+    private fun acquisitionLatestChat(): MutableList<String> {
+        val chatLog = Data.chatLog
+        val lastChat = mutableListOf<String>()
+        val lastSize = 5
+        val chatSize = chatLog.size
+        val startNumber = if (chatLog.size >= lastSize) {
+            chatSize - lastSize
+        } else {
+            0
         }
 
-        // ファイルとフォルダを再帰的にコピー
-        Files.walkFileTree(
-            source,
-            object : SimpleFileVisitor<Path>() {
-                override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
-                    val targetPath = destination.resolve(source.relativize(dir))
-                    if (Files.notExists(targetPath)) {
-                        Files.createDirectory(targetPath)
-                    }
-                    return FileVisitResult.CONTINUE
-                }
-
-                override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                    // session.lock ファイルをスキップ
-                    if (file.fileName.toString() == "session.lock") {
-                        return FileVisitResult.CONTINUE
-                    }
-                    Files.copy(file, destination.resolve(source.relativize(file)), StandardCopyOption.REPLACE_EXISTING)
-                    return FileVisitResult.CONTINUE
-                }
-            }
-        )
-    }
-
-    private fun makeTimeFolder(timeFolderName: String) {
-        val path = "$backupFolderPath/$timeFolderName"
-        if (!File(path).exists()) { // ファイルが無ければ作成
-            Files.createDirectory(Paths.get(path))
+        if (chatSize == 0) {
+            return mutableListOf()
         }
+
+        for (i in startNumber until chatSize) {
+            lastChat.add(chatLog[i])
+        }
+
+        Data.chatLog.clear() // チャットログをリセット
+
+        return lastChat
     }
 }

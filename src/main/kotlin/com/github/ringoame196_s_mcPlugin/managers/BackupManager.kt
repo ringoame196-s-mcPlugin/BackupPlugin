@@ -34,7 +34,7 @@ class BackupManager(private val plugin: Plugin) {
         val folderNames = config.getList("BackupFolderNames")?.toMutableList() ?: mutableListOf()
 
         try {
-            makeTimeFolder(timeFolderName)
+            makeTimeFolder(timeFolderName) // 時間フォルダを作成
             makeServerInfo(timeFolderName)
             for (folderName in folderNames) {
                 copyFolder(timeFolderName, folderName.toString())

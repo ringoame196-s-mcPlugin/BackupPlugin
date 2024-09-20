@@ -1,7 +1,9 @@
 package com.github.ringoame196_s_mcPlugin.managers
 
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor
 import org.bukkit.plugin.Plugin
+import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
@@ -16,6 +18,7 @@ import java.time.format.DateTimeFormatter
 class BackupManager(private val plugin: Plugin) {
     private val backupFolderPath = "${plugin.dataFolder}/backups"
     private val worldFolder = Bukkit.getWorldContainer()
+    private val config = plugin.config
 
     fun makeBackupFolder() {
         if (!File(backupFolderPath).exists()) { // フォルダーが存在していなかったら
@@ -39,7 +42,33 @@ class BackupManager(private val plugin: Plugin) {
         return normallyExecution
     }
 
-    private fun copyFolder(folderName: String) {
+    fun startAutoBackup() {
+        val interval = (config.getInt("BackupInterval") * 20).toLong()
+
+        object : BukkitRunnable() {
+            override fun run() {
+                val commentaryStatus = backupFolder()
+
+                if (commentaryStatus) {
+                    val message = "${ChatColor.AQUA}自動バックアップ完了"
+                    sendMessageToOP(message)
+                } else {
+                    val message = "${ChatColor.RED}自動バックアップ中にエラーが起きました 詳細はコンソール"
+                    sendMessageToOP(message)
+                }
+            }
+        }.runTaskTimer(plugin, 0L, interval) // 1秒間隔 (20 ticks) でタスクを実行
+    }
+
+    fun sendMessageToOP(message: String) {
+        for (player in Bukkit.getOnlinePlayers()) {
+            if (player.isOp) {
+                player.sendMessage(message)
+            }
+        }
+    }
+
+    private fun copyFolder(timeFolderName: String, folderName: String) {
         val copySourcePath = "$worldFolder/$folderName"
         val currentDateTime = LocalDateTime.now()
         val formatter = DateTimeFormatter.ofPattern("MM-dd-HH-mm-ss")

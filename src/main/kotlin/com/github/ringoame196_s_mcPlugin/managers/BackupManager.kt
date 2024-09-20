@@ -1,5 +1,6 @@
 package com.github.ringoame196_s_mcPlugin.managers
 
+import com.github.ringoame196_s_mcPlugin.Data
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.plugin.Plugin
@@ -45,6 +46,50 @@ class BackupManager(private val plugin: Plugin) {
             normallyExecution = false
         }
         return normallyExecution
+    }
+
+    private fun copyFolder(timeFolderName: String, folderName: String) {
+        val copySourcePath = "$worldFolder/$folderName"
+        val backupFolderPath = Paths.get("$backupFolderPath/$timeFolderName/$folderName")
+
+        copyDir(Paths.get(copySourcePath), backupFolderPath)
+    }
+
+    private fun copyDir(source: Path, destination: Path) {
+        // コピー先のフォルダが存在しない場合は実行しない
+        if (Files.notExists(destination)) {
+            return
+        }
+
+        // ファイルとフォルダを再帰的にコピー
+        Files.walkFileTree(
+            source,
+            object : SimpleFileVisitor<Path>() {
+                override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
+                    val targetPath = destination.resolve(source.relativize(dir))
+                    if (Files.notExists(targetPath)) {
+                        Files.createDirectory(targetPath)
+                    }
+                    return FileVisitResult.CONTINUE
+                }
+
+                override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+                    // session.lock ファイルをスキップ
+                    if (file.fileName.toString() == "session.lock") {
+                        return FileVisitResult.CONTINUE
+                    }
+                    Files.copy(file, destination.resolve(source.relativize(file)), StandardCopyOption.REPLACE_EXISTING)
+                    return FileVisitResult.CONTINUE
+                }
+            }
+        )
+    }
+
+    private fun makeTimeFolder(timeFolderName: String) {
+        val path = "$backupFolderPath/$timeFolderName"
+        if (!File(path).exists()) { // ファイルが無ければ作成
+            Files.createDirectory(Paths.get(path))
+        }
     }
 
     fun startAutoBackup() {

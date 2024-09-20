@@ -11,6 +11,6 @@ class AsyncPlayerChatEvent : Listener {
         val player = e.player
         val message = e.message
         val playerName = player.name
-        Data.chatLog.add("$playerName $message")
+        Data.chatLog.add("$playerName $message") // チャットを保存する
     }
 }

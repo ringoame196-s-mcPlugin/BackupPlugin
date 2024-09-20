@@ -154,4 +154,25 @@ class BackupManager(private val plugin: Plugin) {
 
         return lastChat
     }
+
+    fun acquisitionBackupList(): MutableList<String> {
+        val backupFolder = File(backupFolderPath)
+        // フォルダーが存在し、ディレクトリであるかを確認
+        return if (backupFolder.exists() && backupFolder.isDirectory) {
+            // 直下のディレクトリのみをリストにして返す
+            backupFolder.listFiles { file -> file.isDirectory }?.map { it.name }?.toMutableList() ?: mutableListOf()
+        } else {
+            // フォルダーが存在しない場合、空のリストを返す
+            mutableListOf()
+        }
+    }
+
+    fun deleteALLBackupFolder() {
+        val backupList = acquisitionBackupList()
+
+        for (folderName in backupList) {
+            val path = "$backupFolderPath/$folderName"
+            File(path).deleteRecursively() // 強制削除する
+        }
+    }
 }

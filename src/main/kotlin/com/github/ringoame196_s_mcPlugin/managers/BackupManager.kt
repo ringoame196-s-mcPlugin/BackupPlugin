@@ -56,9 +56,9 @@ class BackupManager(private val plugin: Plugin) {
     }
 
     private fun copyDir(source: Path, destination: Path) {
-        // コピー先のフォルダが存在しない場合は実行しない
+        // コピー先のフォルダが存在しない場合は作成
         if (Files.notExists(destination)) {
-            return
+            Files.createDirectories(destination)
         }
 
         // ファイルとフォルダを再帰的にコピー

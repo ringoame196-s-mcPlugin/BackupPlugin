@@ -1,0 +1,4 @@
+AutoBackup : false # 自動でバックアップするか
+BackupInterval : 160 # バックアップの間隔(秒)
+BackupFolderNames: # バックアップしたいフォルダーの名前
+  - world

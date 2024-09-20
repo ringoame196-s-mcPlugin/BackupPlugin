@@ -9,6 +9,9 @@ class Main : JavaPlugin() {
     override fun onEnable() {
         super.onEnable()
         val plugin = this
+        val backupManager = BackupManager(plugin)
+        saveDefaultConfig() // configファイル生成
+        backupManager.makeBackupFolder() // バックアップフォルダー作成
         server.pluginManager.registerEvents(Events(), plugin)
         // val command = getCommand("command")
         // command!!.setExecutor(Command())

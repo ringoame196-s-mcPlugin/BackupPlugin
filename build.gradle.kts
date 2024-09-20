@@ -45,7 +45,7 @@ configure<BukkitPluginDescription> {
         register("backupmanager") {
             description = "バックアップ管理用コマンド"
             permission = "op"
-            usage = "/backup"
+            usage = "/backup [backup,deleteall,list,reloadconfig]"
         }
     }
 }

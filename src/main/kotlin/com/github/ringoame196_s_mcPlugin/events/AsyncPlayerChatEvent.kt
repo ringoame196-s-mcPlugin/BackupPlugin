@@ -5,9 +5,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
 
-class PlayerChatEvent : Listener {
+class AsyncPlayerChatEvent : Listener {
     @EventHandler
-    fun onPlayerChat(e: AsyncPlayerChatEvent) {
+    fun onAsyncPlayerChat(e: AsyncPlayerChatEvent) {
         val player = e.player
         val message = e.message
         val playerName = player.name

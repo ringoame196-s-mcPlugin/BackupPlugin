@@ -26,15 +26,19 @@ class BackupManager(private val plugin: Plugin) {
         }
     }
 
-    fun backupFolder():Boolean{
+    fun backupFolder(): Boolean {
         var normallyExecution = true // 正常に実行できたか
-        val config = plugin.config
+        val currentDateTime = LocalDateTime.now()
+        val formatter = DateTimeFormatter.ofPattern("MM-dd-HH-mm-ss")
+        val timeFolderName = currentDateTime.format(formatter)
         val folderNames = config.getList("BackupFolderNames")?.toMutableList() ?: mutableListOf()
+
         try {
+            makeTimeFolder(timeFolderName)
             for (folderName in folderNames) {
-                copyFolder(folderName.toString())
+                copyFolder(timeFolderName, folderName.toString())
             }
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             val errorMessage = e.message
             println(errorMessage) // エラーメッセージを送信
             normallyExecution = false
@@ -70,12 +74,7 @@ class BackupManager(private val plugin: Plugin) {
 
     private fun copyFolder(timeFolderName: String, folderName: String) {
         val copySourcePath = "$worldFolder/$folderName"
-        val currentDateTime = LocalDateTime.now()
-        val formatter = DateTimeFormatter.ofPattern("MM-dd-HH-mm-ss")
-        val backupTimeFolderName = currentDateTime.format(formatter)
-        val backupFolderPath = Paths.get("$backupFolderPath/$backupTimeFolderName/$folderName")
-
-        makeTimeFolder(backupTimeFolderName) // 時間ごとのフォルダー作成
+        val backupFolderPath = Paths.get("$backupFolderPath/$timeFolderName/$folderName")
 
         copyDir(Paths.get(copySourcePath), backupFolderPath)
     }
@@ -110,8 +109,8 @@ class BackupManager(private val plugin: Plugin) {
         )
     }
 
-    private fun makeTimeFolder(backupFolderName:String) {
-        val path = "$backupFolderPath/$backupFolderName"
+    private fun makeTimeFolder(timeFolderName: String) {
+        val path = "$backupFolderPath/$timeFolderName"
         if (!File(path).exists()) { // ファイルが無ければ作成
             Files.createDirectory(Paths.get(path))
         }

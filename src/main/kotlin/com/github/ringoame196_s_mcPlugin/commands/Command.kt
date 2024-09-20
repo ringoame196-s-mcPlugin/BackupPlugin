@@ -12,7 +12,7 @@ class Command(plugin: Plugin) : CommandExecutor {
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         val subCommand = args[0]
-        when(subCommand) {
+        when (subCommand) {
             CommandConst.BACKUP_COMMAND -> backupCommand(sender)
             else -> {
                 val message = "${ChatColor.RED}コマンド構文がありません"
@@ -26,11 +26,11 @@ class Command(plugin: Plugin) : CommandExecutor {
         val commentaryStatus = backupManager.backupFolder()
 
         if (commentaryStatus) {
-            val message = "${ChatColor.GOLD}正常にバックアップされました"
-            sender.sendMessage(message)
+            val message = "${ChatColor.GOLD}正常にバックアップされました (実行者:${sender.name})"
+            backupManager.sendMessageToOP(message)
         } else {
-            val message = "${ChatColor.RED}バックアップ中にエラーが起きました 詳細はコンソールをご覧ください"
-            sender.sendMessage(message)
+            val message = "${ChatColor.RED}バックアップ中にエラーが起きました 詳細はコンソール"
+            backupManager.sendMessageToOP(message)
         }
     }
 }

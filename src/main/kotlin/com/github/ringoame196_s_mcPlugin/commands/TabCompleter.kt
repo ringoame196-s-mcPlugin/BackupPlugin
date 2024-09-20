@@ -7,7 +7,7 @@ import org.bukkit.command.TabCompleter
 class TabCompleter : TabCompleter {
     override fun onTabComplete(commandSender: CommandSender, command: Command, label: String, args: Array<out String>): MutableList<String>? {
         return when (args.size) {
-            1 -> mutableListOf(CommandConst.BACKUP_COMMAND)
+            1 -> mutableListOf(CommandConst.BACKUP_COMMAND, CommandConst.RELOAD_CONFIG_COMMAND)
             else -> mutableListOf()
         }
     }
